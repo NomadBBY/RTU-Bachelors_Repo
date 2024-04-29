@@ -1,0 +1,74 @@
+;# Step 1: Mount Google Drive
+from google.colab import drive
+drive.mount('/content/drive')
+
+# Step 2: Import pandas
+import pandas as pd
+import os
+
+folder = "/overhang/ball_fault/20g"
+
+# Define the parent folder path in Google Drive
+parent_folder_path = '/content/drive/My Drive/'
+
+# Define the graphs folder path
+graphs_folder_path = os.path.join(parent_folder_path, "Graphs")
+
+# Function to create a folder if it doesn't exist
+def create_folder_if_not_exists(parent_folder_path, folder_name):
+    folder_path = os.path.join(parent_folder_path, folder_name)
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
+# Function to create the folder structure and read CSV files
+def process_folder(folder_path):
+    global graphs_folder_path
+
+    # Specify the folder names
+    folders = [
+        "microphone",
+        "overhang bearing accelerometer 3d",
+        "tachometer",
+        "underhang bearing accelerometer 3d"
+    ]
+
+    # Specify the folder name
+    folder_name = os.path.basename(folder_path)
+
+    # Create the specified folders inside the "20g" folder within the "Graphs/underhang/ball_fault" directory if they don't exist
+    create_folder_if_not_exists(os.path.join(graphs_folder_path, "overhang/ball_fault/20g"), "")
+
+    for folder_name in folders:
+        create_folder_if_not_exists(os.path.join(graphs_folder_path, "overhang/ball_fault/20g"), folder_name)
+
+    # Initialize an empty list to store DataFrame objects
+    data_frames = []
+
+    # Iterate through all files in the folder
+    for filename in os.listdir(folder_path):
+        if filename.endswith('.csv'): # Filter only CSV files
+            file_path = os.path.join(folder_path, filename)
+
+            # Read the CSV file and append DataFrame to the list
+            data = pd.read_csv(file_path, sep=',', header=None)
+            data_frames.append(data)
+
+    # Return the DataFrame objects
+    return data_frames
+
+# Example usage:
+folder_path = f'/content/drive/My Drive/Data Sets{folder}'
+data_frames = process_folder(folder_path)
+
+ # Step 7: Import necessary libraries
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Step 8: Get sorted list of file names and take the first 8 files
+file_names = sorted(os.listdir(folder_path))
+
+# Step 9: Iterate through each DataFrame, compute descriptive statistics, and print file name
+for i, file_name in enumerate(file_names):
+    data = data_frames[i]  # Get corresponding DataFrame
+    print("File:", file_name)  # Print filename
+    print(data.describe())  # Compute and print descriptive statistics for the DataFrame
